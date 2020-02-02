@@ -8,7 +8,7 @@ public class MainController : MonoBehaviour
 {
 
     public Camera renderCamera;
-    public GameObject fakeFace;
+    public GameObject personInfoTextPrefab;
     public FeedbackTexture feedbackTexture;
     [Range(0.0f, 10000.0f)] public float multiplier;
     [Range(0.0f, 100.0f)] public float baseDist;
@@ -18,6 +18,7 @@ public class MainController : MonoBehaviour
     
     int numDetectedFaces = 0;
     List<Vector4> faceBoundCoords = new List<Vector4>();
+    List<GameObject> personInfoTexts = new List<GameObject>();
 
     // Start is called before the first frame update
     void Start()
@@ -44,22 +45,29 @@ public class MainController : MonoBehaviour
             // do something with bounding boxes
             numDetectedFaces = newBoxes.Length;
 
+            foreach(GameObject currentOldPersonInfoText in personInfoTexts) {
+                Destroy(currentOldPersonInfoText);
+            }
 
             faceBoundCoords.Clear();
             foreach (var currentBox in newBoxes){
                 var currRect = currentBox.faceRectangle;
                 faceBoundCoords.Add(new Vector4(currRect.left, currRect.top, currRect.width, currRect.height));
             }
-            Vector3 point = new Vector3();
             foreach (var currentFBC in faceBoundCoords)
             {
+
+                // Calculate
+                Vector3 point = new Vector3();
                 Vector2 centerPos = new Vector2();
                 centerPos.x = currentFBC.x + currentFBC.z / 2;
                 centerPos.y = renderCamera.pixelHeight - (currentFBC.y + currentFBC.w / 2);
                 float length = Vector2.Distance(new Vector2(currentFBC.x, currentFBC.y), new Vector2(currentFBC.x+currentFBC.z, currentFBC.y+ currentFBC.w));
                 point = renderCamera.ScreenToWorldPoint(new Vector3(centerPos.x, centerPos.y, baseDist + multiplier / length));
+
+                personInfoTexts.Add(Instantiate(personInfoTextPrefab, point, Quaternion.identity));
+
             }
-            fakeFace.transform.position = point;
             //TrackFaces(lastBoxes, newBoxes);
         }
     }
