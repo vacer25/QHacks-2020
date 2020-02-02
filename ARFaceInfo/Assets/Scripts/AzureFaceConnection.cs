@@ -10,15 +10,15 @@ using System.Text;
 public class AzureFaceConnection : MonoBehaviour {
     [Serializable]
     public struct AzureDetectBoundingBox {
-        int left;
-        int top;
-        int width;
-        int height;
+        public int left;
+        public int top;
+        public int width;
+        public int height;
     }
     [Serializable]
     public struct AzureDetectResult {
         string faceId;
-        AzureDetectBoundingBox faceRectangle;
+        public AzureDetectBoundingBox faceRectangle;
     }
     [Serializable]
     public struct AzureDetectResultArray {
