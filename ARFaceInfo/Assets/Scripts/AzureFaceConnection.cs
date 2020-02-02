@@ -25,13 +25,43 @@ public class AzureFaceConnection : MonoBehaviour {
         public AzureDetectResult[] array;
     }
 
+    [Serializable]
+    public struct AzureIdentifyPrompt {
+        public string personGroupId;
+        public string[] faceIds;
+    }
+
+    [Serializable]
+    public struct AzureIdentifyCandidate {
+        public string personId;
+        public double confidence;
+    }
+    [Serializable]
+    public struct AzureIdentifyResult {
+        public string faceId;
+        public AzureIdentifyCandidate[] candidates;
+    }
+    [Serializable]
+    public struct AzureIdentifyResultArray {
+        public AzureIdentifyResult[] array;
+    }
+
+    [Serializable]
+    public struct AzurePersonResult {
+        public string personId;
+        public string[] persistedFaceIds;
+        public string name;
+        public string userData;
+    }
+
+
     bool _newBoxesAvailable = false;
     int _lastSequenceSent = 0;
     int _lastSequenceReceived = 0;
     AzureDetectResult[] _lastBoxes;
 
-    Dictionary<object, string> _faceDataCache;
-    HashSet<object> _outstandingData;
+    Dictionary<object, string> _faceDataCache = new Dictionary<object, string>();
+    HashSet<object> _outstandingData = new HashSet<object>();
 
     public string endpoint, key, pgUuid;
 
@@ -70,7 +100,10 @@ public class AzureFaceConnection : MonoBehaviour {
         return false;
     }
     public void ClearFace(object token) {
-        _faceDataCache.Remove(token);
+        if (_outstandingData.Contains(token))
+            _outstandingData.Remove(token);
+        if (_faceDataCache.ContainsKey(token))
+            _faceDataCache.Remove(token);
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -83,6 +116,7 @@ public class AzureFaceConnection : MonoBehaviour {
         wr.url = new StringBuilder()
             .Append(endpoint)
             .Append("/detect")
+            .Append("?recognitionModel=recognition_02")
             .ToString();
         wr.method = UnityWebRequest.kHttpVerbPOST;
         wr.SetRequestHeader("Content-Type", "application/octet-stream");
@@ -102,8 +136,75 @@ public class AzureFaceConnection : MonoBehaviour {
         }
     }
 
-    // Private method to query Azure to identify the faces we just had.
+ // Private method to query Azure to identify the faces we just had.
     private IEnumerator AzureIdentify(object token, string faceId) {
-        yield break;
+        string personId;
+        {
+            UnityWebRequest wr = new UnityWebRequest();
+            wr.SetRequestHeader("Ocp-Apim-Subscription-Key", key);
+            wr.url = new StringBuilder()
+                .Append(endpoint)
+                .Append("/identify")
+                .ToString();
+            wr.method = UnityWebRequest.kHttpVerbPOST;
+            wr.SetRequestHeader("Content-Type", "application/json");
+
+            AzureIdentifyPrompt prompt = new AzureIdentifyPrompt(){
+                personGroupId = pgUuid,
+                faceIds = new string[]{faceId}
+            };
+
+            string prompt_text = JsonUtility.ToJson(prompt);
+
+            wr.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(prompt_text));
+            wr.downloadHandler = new DownloadHandlerBuffer();
+
+            yield return wr.SendWebRequest();
+            if (wr.isNetworkError || wr.isHttpError) {
+                Debug.Log("identify " + wr.error + " " + wr.downloadHandler.text);
+                _outstandingData.Remove(token);
+                yield break;
+            }
+            var identify_results = JsonUtility.FromJson<AzureIdentifyResultArray>("{\"array\":"+wr.downloadHandler.text+"}").array;
+            if (identify_results.Length != 1) {
+                Debug.Log("[token = "+token.ToString()+"] Invalid number of results");
+                _outstandingData.Remove(token);
+                yield break;
+            }
+            var ident = identify_results[0];
+            if (ident.candidates.Length != 1) {
+                Debug.Log("[token = "+token.ToString()+"] Invalid number of candidates");
+                _outstandingData.Remove(token);
+                yield break;
+            }
+            personId = ident.candidates[0].personId;
+        }
+        {
+            UnityWebRequest wr = new UnityWebRequest();
+            wr.SetRequestHeader("Ocp-Apim-Subscription-Key", key);
+            wr.url = new StringBuilder()
+                .Append(endpoint)
+                .Append("/persongroups/")
+                .Append(pgUuid)
+                .Append("/persons/")
+                .Append(personId)
+                .ToString();
+            wr.method = UnityWebRequest.kHttpVerbGET;
+            // wr.SetRequestHeader("Content-Type", "application/json");
+
+            // string prompt_text = JsonUtility.ToJson<AzureIdentifyPrompt>(prompt);
+            // wr.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(prompt_text)));
+            wr.downloadHandler = new DownloadHandlerBuffer();
+
+            yield return wr.SendWebRequest();
+            if (wr.isNetworkError || wr.isHttpError) {
+                Debug.Log("person get" + wr.error);
+                _outstandingData.Remove(token);
+                yield break;
+            }
+            var result = JsonUtility.FromJson<AzurePersonResult>(wr.downloadHandler.text);
+            _faceDataCache[token] = result.name;
+            _outstandingData.Remove(token);
+        }
     }
 }
