@@ -1,0 +1,9 @@
+{
+    "persongroup":{
+        "uuid":"dd649268-d27d-4c6f-9ab8-ce6062b70276",
+        "name":"Trained users"
+    },
+    "person":{
+        "name":"George"
+    }
+}
