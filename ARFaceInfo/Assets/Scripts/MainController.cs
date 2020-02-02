@@ -13,6 +13,10 @@ public class MainController : MonoBehaviour
     
     public AzureFaceConnection azureFaceConnection;
 
+    AzureFaceConnection.AzureDetectResult[] lastBoxes;
+    
+    int numDetectedFaces = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -28,16 +32,28 @@ public class MainController : MonoBehaviour
         if(feedbackTexture.newImageBytesAvailable) {
             feedbackTexture.newImageBytesAvailable = false;
 
-            var x =  feedbackTexture.imageBytes;
-            azureFaceConnection.StartDetectFace(x);
-
+            var imageBytes =  feedbackTexture.imageBytes;
+            azureFaceConnection.StartDetectFace(imageBytes);
 
         }
         // Check for bounding boxes
-        AzureFaceConnection.AzureDetectResult[] adr;
-        if (azureFaceConnection.TryGetNewBoundingBox(out adr)) {
+        AzureFaceConnection.AzureDetectResult[] newBoxes;
+        if (azureFaceConnection.TryGetNewBoundingBox(out newBoxes)) {
             // do something with bounding boxes
-            Debug.Log("# of Boxes: " + adr.Length);
+            numDetectedFaces = newBoxes.Length;
+            //TrackFaces(lastBoxes, newBoxes);
         }
     }
+
+    void OnGUI() {
+        const int labelHeight = 60;
+        const int boundary = 20;
+
+        GUI.skin.label.fontSize = GUI.skin.box.fontSize = GUI.skin.button.fontSize = 40;
+        GUI.skin.label.alignment = TextAnchor.MiddleLeft;
+
+        GUI.Label(new Rect(Screen.width - boundary - 200, Screen.height - labelHeight - boundary, 400, labelHeight),
+                  $"# faces: {numDetectedFaces}");
+    }
+
 }
