@@ -477,6 +477,67 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 837386168}
   m_CullTransparentMesh: 0
+--- !u!1 &881925743
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 881925744}
+  - component: {fileID: 881925745}
+  - component: {fileID: 881925746}
+  m_Layer: 0
+  m_Name: Controller
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &881925744
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 881925743}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.8, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &881925745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 881925743}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 917c71303f4e8c34e8705fca69dbd6ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  feedbackTexture: {fileID: 1914245116}
+  azureFaceConnection: {fileID: 881925746}
+--- !u!114 &881925746
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 881925743}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0696e46ddbc26384090e42b2ec1866f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  endpoint: https://qhacks-2020-face.cognitiveservices.azure.com/face/v1.0
+  key: 529e793b42714a1aa83d84ed12a08de2
+  pgUuid: dd649268-d27d-4c6f-9ab8-ce6062b70276
 --- !u!1 &903525094
 GameObject:
   m_ObjectHideFlags: 0
@@ -944,7 +1005,6 @@ MonoBehaviour:
   seeThroughCamera: {fileID: 1914245112}
   renderingCamera: {fileID: 2069872582}
   backgroundMaterial: {fileID: 2100000, guid: 1495c3ae84f8b4298bda7a8707e4225e, type: 2}
-  cameraTexture: {fileID: 0}
   debugBackgroundMaterial: {fileID: 2100000, guid: 2decce40e16d54b9084c7e8d6f94cffb,
     type: 2}
 --- !u!114 &1914245114
@@ -993,7 +1053,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rt: {fileID: 8400000, guid: 37e3736a6b7313645bf0394a202b0769, type: 2}
-  frameDelay: 0
+  frameDelay: 10
+  imageBytes: 
+  newImageBytesAvailable: 0
 --- !u!1 &2034373812
 GameObject:
   m_ObjectHideFlags: 0
