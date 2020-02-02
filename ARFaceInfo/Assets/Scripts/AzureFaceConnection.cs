@@ -17,7 +17,7 @@ public class AzureFaceConnection : MonoBehaviour {
     }
     [Serializable]
     public struct AzureDetectResult {
-        string faceId;
+        public string faceId;
         public AzureDetectBoundingBox faceRectangle;
     }
     [Serializable]

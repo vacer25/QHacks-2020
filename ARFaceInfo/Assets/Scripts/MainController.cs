@@ -14,7 +14,7 @@ public class MainController : MonoBehaviour
     [Range(0.0f, 100.0f)] public float baseDist;
     public AzureFaceConnection azureFaceConnection;
 
-    AzureFaceConnection.AzureDetectResult[] lastBoxes;
+    List<string> names = new List<string>();
     
     int numDetectedFaces = 0;
     List<Vector4> faceBoundCoords = new List<Vector4>();
@@ -49,11 +49,14 @@ public class MainController : MonoBehaviour
                 Destroy(currentOldPersonInfoText);
             }
 
+            names.Clear();
             faceBoundCoords.Clear();
             foreach (var currentBox in newBoxes){
+                names.Add(currentBox.faceId);
                 var currRect = currentBox.faceRectangle;
                 faceBoundCoords.Add(new Vector4(currRect.left, currRect.top, currRect.width, currRect.height));
             }
+            int i = 0;
             foreach (var currentFBC in faceBoundCoords)
             {
 
@@ -65,10 +68,14 @@ public class MainController : MonoBehaviour
                 float length = Vector2.Distance(new Vector2(currentFBC.x, currentFBC.y), new Vector2(currentFBC.x+currentFBC.z, currentFBC.y+ currentFBC.w));
                 point = renderCamera.ScreenToWorldPoint(new Vector3(centerPos.x, centerPos.y, baseDist + multiplier / length));
 
-                personInfoTexts.Add(Instantiate(personInfoTextPrefab, point, Quaternion.identity));
+                GameObject personInfoTextObject = Instantiate(personInfoTextPrefab, point, Quaternion.identity);
+                PersonInfoText personInfoText = personInfoTextObject.GetComponent(typeof(PersonInfoText)) as PersonInfoText;
+                personInfoText.setText(names[i]);
+                personInfoTexts.Add(personInfoTextObject);
+
+                i++;
 
             }
-            //TrackFaces(lastBoxes, newBoxes);
         }
     }
 
