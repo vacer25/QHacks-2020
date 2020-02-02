@@ -1,6 +1,18 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.ARFoundation;
+using Unity.Collections;
+using System.Collections;
+using System.Collections.Generic;
+using System;
+using UnityEngine;
+using UnityEngine.XR;
+using UnityEngine.XR.ARExtensions;
+using UnityEngine.XR.ARFoundation;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Collections;
+
 
 public sealed class SeeThroughController : MonoBehaviour {
     #region Editor public fields
@@ -52,6 +64,7 @@ public sealed class SeeThroughController : MonoBehaviour {
     #region Unity methods
 
     void Start() {
+
 #if UNITY_EDITOR
         webCamTexture = new WebCamTexture();
         webCamTexture.Play();
@@ -71,6 +84,63 @@ public sealed class SeeThroughController : MonoBehaviour {
 
         ARSubsystemManager.cameraFrameReceived += OnCameraFrameReceived;
     }
+
+    
+    // // Update is called once per frame
+    // unsafe void Update()
+    // {
+    //     if (Time.frameCount % frameDelay == 0) {
+    //         CameraImage cameraImage;
+
+    //         Texture2D cameraTexture;    //Put this back at the top
+
+    //         // The following WORKS
+    //         //ARSubsystemManager.cameraSubsystem.GetTextures(cameraTexture);
+    //         var cameraSubsystem = ARSubsystemManager.cameraSubsystem;
+
+    //         cameraSubsystem.TryGetLatestImage(out cameraImage);
+
+    //         // https://docs.unity3d.com/Packages/com.unity.xr.arfoundation@1.0/manual/cpu-camera-image.html?q=OnCameraFrameReceived
+    //         var conversionParams = new CameraImageConversionParams
+    //         {
+    //             // Get the entire image.  Downsample by 2.  Greyscale Alpha 8
+    //             inputRect = new RectInt(0, 0, cameraImage.width, cameraImage.height),
+    //             outputDimensions = new Vector2Int(cameraImage.width / 2, cameraImage.height / 2),
+    //             outputFormat = TextureFormat.Alpha8,
+    //         };
+
+    //         // See how many bytes we need to store the final image.
+    //         int size = cameraImage.GetConvertedDataSize(conversionParams);
+
+    //         // Allocate a buffer to store the image
+    //         var buffer = new NativeArray<byte>(size, Allocator.Temp);
+
+    //         // Extract the image data
+    //         cameraImage.Convert(conversionParams, new IntPtr(buffer.GetUnsafePtr()), buffer.Length);
+
+    //         // The image was converted to RGBA32 format and written into the provided buffer
+    //         // so we can dispose of the CameraImage. We must do this or it will leak resources.
+    //         cameraImage.Dispose();
+
+    //         // Now do something with buffer
+
+    //         cameraTexture = new Texture2D(
+    //             conversionParams.outputDimensions.x,
+    //             conversionParams.outputDimensions.y,
+    //             conversionParams.outputFormat,
+    //             false);
+
+    //         cameraTexture.LoadRawTextureData(buffer);
+    //         cameraTexture.Apply();
+
+    //         // Done with our temporary data
+    //         buffer.Dispose();
+
+    //         byte[] bytes = cameraTexture.EncodeToJPG();
+
+    //         Graphics.Blit(cameraTexture, rt); 
+    //     }
+    // }
 
     void OnGUI() {
         const int labelHeight = 60;
@@ -108,11 +178,11 @@ public sealed class SeeThroughController : MonoBehaviour {
         seeThroughRenderer.Mode = UnityEngine.XR.ARRenderMode.MaterialAsBackground;
 
         if (seeThroughRenderer.BackgroundMaterial != BackgroundMaterial) {
-            BackgroundMaterial = BackgroundMaterial;
+            BackgroundMaterial = BackgroundMaterial; 
         }
     }
 
-    void OnCameraFrameReceived(ARCameraFrameEventArgs eventArgs) {
+    unsafe void OnCameraFrameReceived(ARCameraFrameEventArgs eventArgs) {
         SetupCameraIfNecessary();
     }
 
